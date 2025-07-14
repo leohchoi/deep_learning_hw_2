@@ -111,7 +111,7 @@ class MLPClassifierDeep(nn.Module):
         h: int = 64,
         w: int = 64,
         num_classes: int = 6,
-        hidden_dim: int = 128,
+        hidden_dim: int = 64,
         num_layers: int = 4,
     ):
         """
@@ -137,10 +137,11 @@ class MLPClassifierDeep(nn.Module):
             nn.ReLU(),
         ]
         layers += [
-            nn.Linear(hidden_dim, hidden_dim, bias=False),
+            nn.Linear(in_features, hidden_dim, bias=False),
             nn.LayerNorm(hidden_dim),
             nn.ReLU(),
         ]
+        print("-2")
         for _ in range(num_layers - 2):
             layers += [
                 nn.Linear(hidden_dim, hidden_dim, bias=False),
@@ -197,6 +198,7 @@ class MLPClassifierDeepResidual(nn.Module):
 model_factory = {
     "linear": LinearClassifier,
     "mlp": MLPClassifier,
+    "mlp_tmp": MLPClassifier,
     "mlp_deep": MLPClassifierDeep,
     "mlp_deep_residual": MLPClassifierDeepResidual,
 }

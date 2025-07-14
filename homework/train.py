@@ -160,3 +160,16 @@ if __name__ == "__main__":
 # Model saved to logs/mlp_deep_0714_035330/mlp_deep.th
 
 # python3 -m homework.train --model_name mlp_deep --num_epoch 50 --lr 1e-3 --batch_size 128
+
+# train(
+#     model_name="mlp_deep",
+#     num_epoch=30,
+#     lr=1e-4,
+# )
+# hidden_dim = 128, num_layers = 4
+# Model size: 6.19 MB
+# Epoch  1 / 30: train_acc=0.6474 val_acc=0.7177
+# Epoch 10 / 30: train_acc=0.9464 val_acc=0.8258
+# Epoch 20 / 30: train_acc=0.9729 val_acc=0.8222
+# Epoch 30 / 30: train_acc=0.9898 val_acc=0.8352
+# Model saved to logs/mlp_deep_0714_063855/mlp_deep.th
