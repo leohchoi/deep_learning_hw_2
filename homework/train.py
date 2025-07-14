@@ -8,6 +8,7 @@ import torch.utils.tensorboard as tb
 
 from .models import ClassificationLoss, load_model, save_model
 from .utils import load_data
+from .utils import compute_accuracy 
 
 
 def train(
@@ -45,7 +46,8 @@ def train(
 
     # create loss function and optimizer
     loss_func = ClassificationLoss()
-    # optimizer = ...
+    # optimizer = torch.optim.Adam(model.parameters(), lr=lr, momentum=0.9)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     global_step = 0
     metrics = {"train_acc": [], "val_acc": []}
@@ -62,7 +64,16 @@ def train(
             img, label = img.to(device), label.to(device)
 
             # TODO: implement training step
-            raise NotImplementedError("Training step not implemented")
+            optimizer.zero_grad()
+            logits = model(img)
+            loss = loss_func(logits, label)
+            loss.backward()
+            optimizer.step()
+
+            acc = compute_accuracy(logits, label)
+            logger.add_scalar("train_loss", loss.item(), global_step)
+            metrics["train_acc"].append(acc.item())
+
 
             global_step += 1
 
@@ -74,13 +85,17 @@ def train(
                 img, label = img.to(device), label.to(device)
 
                 # TODO: compute validation accuracy
-                raise NotImplementedError("Validation accuracy not implemented")
+                logits = model(img)
+                acc = compute_accuracy(logits, label)
+                metrics["val_acc"].append(acc.item())
 
         # log average train and val accuracy to tensorboard
         epoch_train_acc = torch.as_tensor(metrics["train_acc"]).mean()
         epoch_val_acc = torch.as_tensor(metrics["val_acc"]).mean()
 
-        raise NotImplementedError("Logging not implemented")
+        # raise NotImplementedError("Logging not implemented")
+        logger.add_scalar("train_accuracy", epoch_train_acc.item(), epoch)
+        logger.add_scalar("val_accuracy", epoch_val_acc.item(), epoch)
 
         # print on first, last, every 10th epoch
         if epoch == 0 or epoch == num_epoch - 1 or (epoch + 1) % 10 == 0:
@@ -112,3 +127,13 @@ if __name__ == "__main__":
 
     # pass all arguments to train
     train(**vars(parser.parse_args()))
+
+# LinearClassifier
+# Model size: 0.28 MB
+# Epoch  1 / 50: train_acc=0.6781 val_acc=0.7142
+# Epoch 10 / 50: train_acc=0.8224 val_acc=0.7405
+# Epoch 20 / 50: train_acc=0.8468 val_acc=0.7401
+# Epoch 30 / 50: train_acc=0.8619 val_acc=0.7698
+# Epoch 40 / 50: train_acc=0.8773 val_acc=0.7469
+# Epoch 50 / 50: train_acc=0.8760 val_acc=0.7405
+# Model saved to logs/linear_0713_003714/linear.th
