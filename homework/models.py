@@ -76,7 +76,20 @@ class MLPClassifier(nn.Module):
         """
         super().__init__()
 
-        raise NotImplementedError("MLPClassifier.__init__() is not implemented")
+        in_features = 3 * h * w
+        hidden1, hidden2 = 192, 96
+        # hidden1 = 210
+        # hidden2 = 100
+        # maybe try hidden1=128, hidden2=64
+
+        self.net = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(in_features, hidden1),
+            nn.ReLU(inplace=True),
+            nn.Linear(hidden1, hidden2),
+            nn.ReLU(inplace=True),
+            nn.Linear(hidden2, num_classes)
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -86,7 +99,7 @@ class MLPClassifier(nn.Module):
         Returns:
             tensor (b, num_classes) logits
         """
-        raise NotImplementedError("MLPClassifier.forward() is not implemented")
+        return self.net(x)
 
 
 class MLPClassifierDeep(nn.Module):
@@ -95,6 +108,8 @@ class MLPClassifierDeep(nn.Module):
         h: int = 64,
         w: int = 64,
         num_classes: int = 6,
+        hidden_dim: int = 128,
+        num_layers: int = 10,
     ):
         """
         An MLP with multiple hidden layers
@@ -110,7 +125,23 @@ class MLPClassifierDeep(nn.Module):
         """
         super().__init__()
 
-        raise NotImplementedError("MLPClassifierDeep.__init__() is not implemented")
+
+        in_features = 3 * h * w
+        layers: list[nn.Module] = [
+            nn.Flatten(),
+            nn.Linear(in_features, hidden_dim),
+            nn.ReLU(inplace=True),
+        ]
+
+        for _ in range(num_layers - 1):
+            layers += [
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.ReLU(inplace=True),
+            ]
+
+        layers.append(nn.Linear(hidden_dim, num_classes))
+
+        self.net = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -120,7 +151,7 @@ class MLPClassifierDeep(nn.Module):
         Returns:
             tensor (b, num_classes) logits
         """
-        raise NotImplementedError("MLPClassifierDeep.forward() is not implemented")
+        return self.net(x)
 
 
 class MLPClassifierDeepResidual(nn.Module):
@@ -158,6 +189,7 @@ class MLPClassifierDeepResidual(nn.Module):
 model_factory = {
     "linear": LinearClassifier,
     "mlp": MLPClassifier,
+    "mlp_tmp": MLPClassifier,
     "mlp_deep": MLPClassifierDeep,
     "mlp_deep_residual": MLPClassifierDeepResidual,
 }

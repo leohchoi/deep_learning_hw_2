@@ -121,6 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_epoch", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=2024)
+    parser.add_argument("--batch_size", type=int, default=128)
 
     # optional: additional model hyperparamters
     # parser.add_argument("--num_layers", type=int, default=3)
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     # pass all arguments to train
     train(**vars(parser.parse_args()))
 
-# LinearClassifier
+# LinearClassifier - default params
 # Model size: 0.28 MB
 # Epoch  1 / 50: train_acc=0.6781 val_acc=0.7142
 # Epoch 10 / 50: train_acc=0.8224 val_acc=0.7405
@@ -137,3 +138,25 @@ if __name__ == "__main__":
 # Epoch 40 / 50: train_acc=0.8773 val_acc=0.7469
 # Epoch 50 / 50: train_acc=0.8760 val_acc=0.7405
 # Model saved to logs/linear_0713_003714/linear.th
+
+# MLPClassifier - default params
+# Model size: 9.07 MB
+# Epoch  1 / 50: train_acc=0.6951 val_acc=0.7375
+# Epoch 10 / 50: train_acc=0.9359 val_acc=0.7982
+# Epoch 20 / 50: train_acc=0.9663 val_acc=0.7977
+# Epoch 30 / 50: train_acc=0.9779 val_acc=0.8022
+# Epoch 40 / 50: train_acc=0.9906 val_acc=0.8141
+# Epoch 50 / 50: train_acc=0.9880 val_acc=0.8004
+# Model saved to logs/mlp_0713_213046/mlp.th
+
+# MLPClassifierDeep - lr == 2e-3, num_layers=10, hidden_dim=128
+# Model size: 6.57 MB
+# Epoch  1 / 50: train_acc=0.4510 val_acc=0.6474
+# Epoch 10 / 50: train_acc=0.8908 val_acc=0.8121
+# Epoch 20 / 50: train_acc=0.9330 val_acc=0.8051
+# Epoch 30 / 50: train_acc=0.9537 val_acc=0.8162
+# Epoch 40 / 50: train_acc=0.9585 val_acc=0.7809
+# Epoch 50 / 50: train_acc=0.9741 val_acc=0.8077
+# Model saved to logs/mlp_deep_0714_035330/mlp_deep.th
+
+# python3 -m homework.train --model_name mlp_deep --num_epoch 50 --lr 1e-3 --batch_size 128
