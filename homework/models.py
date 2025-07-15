@@ -162,14 +162,41 @@ class MLPClassifierDeep(nn.Module):
         return self.net(x)
 
 
+class Block2(torch.nn.Module):
+    def __init__(self, in_features: int, out_features: int):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(in_features, out_features),
+            nn.LayerNorm(out_features),
+            nn.GELU(),
+            nn.Linear(out_features, out_features),
+            nn.LayerNorm(out_features),
+            nn.GELU(),
+        )
+        if in_features != out_features:
+            self.residual = nn.Linear(in_features, out_features)
+        else:
+            self.residual = nn.Identity()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.residual(x) + self.model(x)
+
 class MLPClassifierDeepResidual(nn.Module):
     def __init__(
         self,
         h: int = 64,
         w: int = 64,
         num_classes: int = 6,
+        hidden_dim: int = 194,
+        num_layers: int = 4,
     ):
         """
+        190, 4, lr=5e-4 = 0.8136
+        128, 4, lr=1e-4, GELU = 0.8147
+        128, 4, lr=5e-4, 40 epochs, GELU = 0.8258
+        190, 4, lr=5e-4, 20 epochs, GELU = 0.8253
+        194, 4, lr=1e-3, 40 epochs, GELU = 0.8296
+        194, 4, lr=1e-3, 90 epochs, GELU = 0.8343
         Args:
             h: int, height of image
             w: int, width of image
@@ -181,7 +208,19 @@ class MLPClassifierDeepResidual(nn.Module):
         """
         super().__init__()
 
-        raise NotImplementedError("MLPClassifierDeepResidual.__init__() is not implemented")
+        in_features = 3 * h * w
+        print(f"{hidden_dim = }, {num_layers = }")
+        layers: list[nn.Module] = [
+            nn.Flatten(),
+            nn.Linear(in_features, hidden_dim, bias=False),
+        ]
+        for _ in range(num_layers - 1):
+            layers.append(Block2(hidden_dim, hidden_dim))
+        # layers.append(nn.Linear(in_features, 6, bias=False))
+        layers.append(nn.LayerNorm(hidden_dim))
+        layers.append(nn.GELU())
+        layers.append(nn.Linear(hidden_dim, num_classes))
+        self.model = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -191,7 +230,7 @@ class MLPClassifierDeepResidual(nn.Module):
         Returns:
             tensor (b, num_classes) logits
         """
-        raise NotImplementedError("MLPClassifierDeepResidual.forward() is not implemented")
+        return self.model(x)
 
 
 model_factory = {
